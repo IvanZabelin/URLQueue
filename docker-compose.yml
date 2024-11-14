@@ -1,0 +1,40 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  selenium-hub:
+    image: selenium/hub:latest
+    ports:
+      - "4444:4444"
+
+  chrome:
+    image: selenium/node-chrome:latest
+    environment:
+      - HUB_HOST=selenium-hub
+    depends_on:
+      - selenium-hub
+
+  fastapi-producer:
+    build:
+      context: .
+      dockerfile: Dockerfile.producer
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
+
+  consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile.consumer
+    depends_on:
+      - rabbitmq
+      - selenium-hub

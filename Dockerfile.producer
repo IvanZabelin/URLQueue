@@ -1,0 +1,8 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+COPY url_handler.py /app/
+
+RUN pip install fastapi pika "uvicorn[standard]"
+
+CMD ["uvicorn", "url_handler:app", "--host", "0.0.0.0", "--port", "8000"]
